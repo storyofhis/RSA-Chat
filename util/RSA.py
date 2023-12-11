@@ -1,3 +1,4 @@
+import math
 import random
 
 class RSA:
@@ -38,18 +39,31 @@ class RSA:
             x0, x1 = x1 - q * x0, x0
         return x1 + m0 if x1 < 0 else x1
 
+    @staticmethod
     def generate_keys():
-        # p, q = RSA.generate_prime()
-        p = 61
-        q = 53
-        N = p * q
+        # Generating prime numbers for key generation (normally done with larger primes)
+        def generate_prime_number():
+            return random.choice([i for i in range(50, 100) if all(i % n != 0 for n in range(2, int(math.sqrt(i)) + 1))])
+
+        # Key generation
+        p = generate_prime_number()
+        q = generate_prime_number()
+
+        n = p * q
         phi = (p - 1) * (q - 1)
+
+        # Choose a random integer 'e' that is coprime with phi
         e = random.randint(1, phi)
-        while RSA.gcd(e, phi) != 1:
+        while math.gcd(e, phi) != 1:
             e = random.randint(1, phi)
-        d = RSA.mod_inverse(e, phi)
-        public_key = (e, N)
-        private_key = (d, N)
+
+        # Calculate the modular inverse of 'e'
+        d = pow(e, -1, phi)
+
+        # Convert keys to string representation of integers
+        public_key = str(n)
+        private_key = str(d)
+
         return public_key, private_key
     
     # Fungsi untuk enkripsi pesan
