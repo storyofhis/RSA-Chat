@@ -86,13 +86,10 @@ class RSA:
         d = private_key  # Assuming the private key is an integer directly
         N = 10000  # Replace this with your actual modulus value
 
-        # Decrypt each character using RSA and convert it back to bytes
-        decrypted_bytes = b""
-        for char in encrypted_msg:
-            decrypted_char = pow(char, d, N)
-            # Convert the decrypted character to bytes
-            decrypted_char_bytes = decrypted_char.to_bytes((decrypted_char.bit_length() + 7) // 8, 'big')
-            decrypted_bytes += decrypted_char_bytes
-        return decrypted_bytes
+        decrypted_integer_list = [pow(char, d, N) for char in encrypted_msg]
+        decrypted_number = int(''.join(str(x) for x in decrypted_integer_list))
+        return decrypted_number
+
+
 
 

@@ -18,15 +18,19 @@ client_socket.send(public_key_client_serialized)
 # receive step1 from server
 # expected_data_size = 5917  
 received_data = client_socket.recv(4096)
-# encrypted_message = pickle.loads(received_data)
-print("Encrypted [IP, PORT, N1] :", received_data)
-decrypted_message = RSA.decrypt(received_data, int(private_key_client))
-print("Decrypted [IP, PORT, N1] :", decrypted_message)
 
 # RSA algorithm
 public_key_serialized = client_socket.recv(4096)
 public_key_server = pickle.loads(public_key_serialized)
 print("Public Key from Server:", public_key_server)
+
+# encrypted_message = pickle.loads(received_data)
+encrypted_n1 = pickle.loads(received_data)
+print("Encrypted [N1] :", encrypted_n1)
+decrypted_message = RSA.decrypt(encrypted_n1, int(private_key_client))
+print("Decrypted [N1] :", decrypted_message)
+
+
 
 
 des = DES(key=int(public_key_server)) # use public_key in RSA Algorithm
