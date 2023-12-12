@@ -1,5 +1,6 @@
 import math
 import random
+import pickle
 
 class RSA:
     def is_prime(n):
@@ -67,14 +68,31 @@ class RSA:
         return public_key, private_key
     
     # Fungsi untuk enkripsi pesan
+    @staticmethod
     def encrypt(message, public_key):
-        e, N = public_key
-        encrypted_msg = [pow(ord(char), e, N) for char in message]
+        e = public_key  # Assuming the public key is an integer directly
+        N = 10000  # Replace this with your actual modulus value
+        
+        # Convert the message to bytes
+        serialized_message = bytes(message)
+        
+        # Encrypt each byte in the serialized message using RSA
+        encrypted_msg = [pow(byte, e, N) for byte in serialized_message]
         return encrypted_msg
 
-    # Fungsi untuk dekripsi pesan
+
+    @staticmethod
     def decrypt(encrypted_msg, private_key):
-        d, N = private_key
-        decrypted_msg = ''.join([chr(pow(char, d, N)) for char in encrypted_msg])
-        return decrypted_msg
+        d = private_key  # Assuming the private key is an integer directly
+        N = 10000  # Replace this with your actual modulus value
+
+        # Decrypt each character using RSA and convert it back to bytes
+        decrypted_bytes = b""
+        for char in encrypted_msg:
+            decrypted_char = pow(char, d, N)
+            # Convert the decrypted character to bytes
+            decrypted_char_bytes = decrypted_char.to_bytes((decrypted_char.bit_length() + 7) // 8, 'big')
+            decrypted_bytes += decrypted_char_bytes
+        return decrypted_bytes
+
 
