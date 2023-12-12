@@ -34,14 +34,14 @@ while True:
 
     # send IP address to client
     encrypted_ip_addr = RSA.encrypt(ip_addr, public_key_client)
-    print(f"ENCRYPTED [IP ADDR]: {encrypted_ip_addr}")
+    # print(f"ENCRYPTED [IP ADDR]: {encrypted_ip_addr}")
 
     ip_addr_send = pickle.dumps(encrypted_ip_addr)
     client_socket.send(ip_addr_send)
 
     # send N1 to client
     encrypted_n1 = RSA.encrypt(N1, public_key_client)
-    print(f"ENCRYPTED [N1]: {encrypted_n1}")
+    # print(f"ENCRYPTED [N1]: {encrypted_n1}")
 
     n1_send = pickle.dumps(encrypted_n1)
     client_socket.send(n1_send)
@@ -51,12 +51,12 @@ while True:
     encrypted_n1 = client_socket.recv(4096)
     encrypted_n1 = pickle.loads(encrypted_n1)
     decrypted_n1 = RSA.decrypt(encrypted_n1, private_key_server)
-    # print(f"Decrypted [N1]: {decrypted_n1}")
+    print(f"Decrypted [N1]: {decrypted_n1}")
     # Receive N2 from client
     encrypted_n2 = client_socket.recv(4096)
     encrypted_n2 = pickle.loads(encrypted_n2)
     decrypted_n2 = RSA.decrypt(encrypted_n2, private_key_server)
-    # print(f"Decrypted [N2]: {decrypted_n2}")
+    print(f"Decrypted [N2]: {decrypted_n2}")
 
     # [3rd STEP] : check if N1 == N1 Decrypted ??
     if decrypted_n1 == N1: 
