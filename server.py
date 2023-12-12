@@ -2,7 +2,7 @@ import hashlib
 import socket
 import pickle
 from DES.DES import DES
-from util.RSA import RSA
+from RSA.RSA import RSA
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 IP = socket.gethostname()
