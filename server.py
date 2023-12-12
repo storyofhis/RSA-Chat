@@ -16,12 +16,14 @@ print(f"{ip_addr}")
 N1 = hashlib.sha256("t442743h38r4re733e2939u3423".encode()).hexdigest()
 print("N1 : ", N1)
 
+public_key_server, private_key_server = RSA.generate_keys()
+print("Public Key [SERVER] : ", public_key_server)
+print("Private Key [SERVER] : ", private_key_server)
+
 while True:
-    public_key_server, private_key_server = RSA.generate_keys()
-    print("Public Key [SERVER] : ", public_key_server)
-    print("Private Key [SERVER] : ", private_key_server)
-    
     client_socket, client_address = server_socket.accept()
+    public_key_server_serialized = pickle.dumps(public_key_server)
+    client_socket.send(public_key_server_serialized)
     # get receive public_key_client
     public_key_client_serialized = client_socket.recv(4096)
     public_key_client = pickle.loads(public_key_client_serialized)
@@ -42,3 +44,23 @@ while True:
 
     n1_send = pickle.dumps(encrypted_n1)
     client_socket.send(n1_send)
+
+    # [2nd STEP] : receive N2 and N1 from client
+    # Receive N1 encrypted from client
+    encrypted_n1 = client_socket.recv(4096)
+    encrypted_n1 = pickle.loads(encrypted_n1)
+    decrypted_n1 = RSA.decrypt(encrypted_n1, private_key_server)
+    print(f"Decrypted [N1]: {decrypted_n1}")
+    # Receive N2 from client
+    encrypted_n2 = client_socket.recv(4096)
+    encrypted_n2 = pickle.loads(encrypted_n2)
+    decrypted_n2 = RSA.decrypt(encrypted_n2, private_key_server)
+    print(f"Decrypted [N2]: {decrypted_n2}")
+
+    # [3rd STEP] : check if N1 == N1 Decrypted ??
+    if decrypted_n1 == N1: 
+        # send Decrypted N2 to Client
+        encrypted_n2 = RSA.encrypt(decrypted_n2, public_key_client)
+        n2_send = pickle.dumps(encrypted_n2)
+        client_socket.send(n2_send)
+    
