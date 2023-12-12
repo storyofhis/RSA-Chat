@@ -1,8 +1,6 @@
-# [RESPONDER B]
-
+import hashlib
 import pickle
 import socket
-from DES.DES import DES
 from util.RSA import RSA
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,45 +13,27 @@ print("Private Key [CLIENT] : ", private_key_client)
 public_key_client_serialized = pickle.dumps(public_key_client)
 client_socket.send(public_key_client_serialized)
 
-# receive step1 from server
-# expected_data_size = 5917  
-received_data = client_socket.recv(4096)
-
-# RSA algorithm
-public_key_serialized = client_socket.recv(4096)
-public_key_server = pickle.loads(public_key_serialized)
-print("Public Key from Server:", public_key_server)
-
-# encrypted_message = pickle.loads(received_data)
-encrypted_n1 = pickle.loads(received_data)
-print("Encrypted [N1] :", encrypted_n1)
-decrypted_message = RSA.decrypt(encrypted_n1, int(private_key_client))
-print("Decrypted [N1] :", decrypted_message)
-
-
-
-
-des = DES(key=int(public_key_server)) # use public_key in RSA Algorithm
+N2 = hashlib.sha256("Y442743h38r4rx733e2939e342Y".encode()).hexdigest()
+print("N1 : ", N2)
 
 while True:
-    message = input('>> ').encode()
-    chipertext = des.encrypt_message(message.decode())
+    # get ip_addr from server
+    encrypted_ip_addr = client_socket.recv(4096)
+    if not encrypted_ip_addr:
+        break
     
-    # Serialize the list of integers to bytes
-    chipertext_bytes = b','.join(str(x).encode() for x in chipertext)
+    encrypted_ip_addr = pickle.loads(encrypted_ip_addr)
+    print(f"Encrypt [IP ADDR]: {encrypted_ip_addr}")
+    decrypted_ip_addr = RSA.decrypt(encrypted_ip_addr, private_key_client)
+    print(f"Decrypt [IP ADDR]: {decrypted_ip_addr}")
+    ip_addr = decrypted_ip_addr  # ip_addr is the IP address
 
-    # Send encrypted message
-    client_socket.send(chipertext_bytes)
-    print("chipertext : ", chipertext)
-    print("plaintext : ", message)
-    print('Sent')
-
-    # Receive response
-    incoming_message = client_socket.recv(1024)
-    incoming_message_bytes = incoming_message.split(b',')
-    incoming_message_bytes = [x for x in incoming_message_bytes if x]
-    print("chipertext from [SERVER]: ", incoming_message)
-    # Decrypt the received ciphertext using DES
-    decrypted_incoming_message = des.decrypt_message([int(x.decode()) for x in incoming_message_bytes])
-    print('plainttext from [SERVER]:', decrypted_incoming_message)
-    print()
+    # get N1 from server
+    encrypted_n1 = client_socket.recv(4096)
+    if not encrypted_n1:
+        break
+    
+    encrypted_n1 = pickle.loads(encrypted_n1)
+    print(f"ENCRYPTED [N1]: {encrypted_n1}")
+    decrypted_n1 = RSA.decrypt(encrypted_n1, private_key_client)
+    print(f"Decrypt [N1]: {decrypted_n1}")

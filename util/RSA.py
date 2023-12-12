@@ -1,6 +1,4 @@
-import math
 import random
-import pickle
 
 class RSA:
     def is_prime(n):
@@ -40,56 +38,28 @@ class RSA:
             x0, x1 = x1 - q * x0, x0
         return x1 + m0 if x1 < 0 else x1
 
-    @staticmethod
     def generate_keys():
-        # Generating prime numbers for key generation (normally done with larger primes)
-        def generate_prime_number():
-            return random.choice([i for i in range(50, 100) if all(i % n != 0 for n in range(2, int(math.sqrt(i)) + 1))])
-
-        # Key generation
-        p = generate_prime_number()
-        q = generate_prime_number()
-
-        n = p * q
+        # p, q = RSA.generate_prime()
+        p = 61
+        q = 53
+        N = p * q
         phi = (p - 1) * (q - 1)
-
-        # Choose a random integer 'e' that is coprime with phi
         e = random.randint(1, phi)
-        while math.gcd(e, phi) != 1:
+        while RSA.gcd(e, phi) != 1:
             e = random.randint(1, phi)
-
-        # Calculate the modular inverse of 'e'
-        d = pow(e, -1, phi)
-
-        # Convert keys to string representation of integers
-        public_key = str(n)
-        private_key = str(d)
-
+        d = RSA.mod_inverse(e, phi)
+        public_key = (e, N)
+        private_key = (d, N)
         return public_key, private_key
     
     # Fungsi untuk enkripsi pesan
-    @staticmethod
     def encrypt(message, public_key):
-        e = public_key  # Assuming the public key is an integer directly
-        N = 10000  # Replace this with your actual modulus value
-        
-        # Convert the message to bytes
-        serialized_message = bytes(message)
-        
-        # Encrypt each byte in the serialized message using RSA
-        encrypted_msg = [pow(byte, e, N) for byte in serialized_message]
+        e, N = public_key
+        encrypted_msg = [pow(ord(char), e, N) for char in message]
         return encrypted_msg
 
-
-    @staticmethod
+    # Fungsi untuk dekripsi pesan
     def decrypt(encrypted_msg, private_key):
-        d = private_key  # Assuming the private key is an integer directly
-        N = 10000  # Replace this with your actual modulus value
-
-        decrypted_integer_list = [pow(char, d, N) for char in encrypted_msg]
-        decrypted_number = int(''.join(str(x) for x in decrypted_integer_list))
-        return decrypted_number
-
-
-
-
+        d, N = private_key
+        decrypted_msg = ''.join([chr(pow(char, d, N)) for char in encrypted_msg])
+        return decrypted_msg

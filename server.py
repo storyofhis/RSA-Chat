@@ -1,69 +1,44 @@
-import pickle
-import socket
-from DES.DES import DES
-from util.RSA import RSA
 import hashlib
+import socket
+import pickle
+from util.RSA import RSA
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((socket.gethostname(), 8080))
+IP = socket.gethostname()
+PORT = 8080
+server_socket.bind((IP, PORT))  # Ganti 'localhost' dengan alamat IP server jika perlu
 server_socket.listen(5)
+
 print("Server sudah siap, menunggu koneksi...")
+ip_addr = f"{IP}:{PORT}"
+print(f"{ip_addr}")
 
-# [1st STEP]
-hostname = socket.gethostname()
-ip_address = socket.gethostbyname(socket.gethostname())
-print(f"HOSTNAME : {hostname}")
-print(f"IP Address: {ip_address}")
-
-n1 = "27345847"
-print("N1 : ", n1)
+N1 = hashlib.sha256("t442743h38r4re733e2939u3423".encode()).hexdigest()
+print("N1 : ", N1)
 
 while True:
-    # RSA algorithm
-    public_key, private_key = RSA.generate_keys()
-    print("Public Key [SERVER]: ", public_key)
-    print("Private Key [SERVER] : ", private_key)
-
+    public_key_server, private_key_server = RSA.generate_keys()
+    print("Public Key [SERVER] : ", public_key_server)
+    print("Private Key [SERVER] : ", private_key_server)
+    
     client_socket, client_address = server_socket.accept()
-    # get receive public_key_client 
+    # get receive public_key_client
     public_key_client_serialized = client_socket.recv(4096)
     public_key_client = pickle.loads(public_key_client_serialized)
+    
     print(f"Public Key [CLIENT] : {public_key_client}")
     print(f"Koneksi dari {client_address} telah diterima.")
 
-    # send n1 to client  
-    n1_bytes = pickle.dumps(n1)
-    encrypted_n1 = RSA.encrypt(n1_bytes, int(public_key_client))
-    print("Encrypted [N1] : ", encrypted_n1)
-    client_socket.send(pickle.dumps(encrypted_n1))
+    # send IP address to client
+    encrypted_ip_addr = RSA.encrypt(ip_addr, public_key_client)
+    print(f"ENCRYPTED [IP ADDR]: {encrypted_ip_addr}")
 
-    des = DES(key=int(public_key)) # use public_key in RSA Algorithm
-    
-    public_key_serialized = pickle.dumps(public_key)
-    client_socket.send(public_key_serialized)
+    ip_addr_send = pickle.dumps(encrypted_ip_addr)
+    client_socket.send(ip_addr_send)
 
-    while True:
-        incoming_message = client_socket.recv(1024)
-        if not incoming_message:
-            break
-        
-        print("chipertext from [CLIENT]: ", incoming_message)
-        chipertext_list = [int(x) for x in incoming_message.split(b',') if x]
-        decrypted_incoming_message = des.decrypt_message(chipertext_list)
+    # send N1 to client
+    encrypted_n1 = RSA.encrypt(N1, public_key_client)
+    print(f"ENCRYPTED [N1]: {encrypted_n1}")
 
-        print('plaintext from [CLIENT]:', decrypted_incoming_message)
-        print()
-        
-        message = input('>> ').encode()
-        chipertext = des.encrypt_message(message.decode())
-    
-        chipertext_bytes = b','.join(str(x).encode() for x in chipertext)
-        client_socket.send(chipertext_bytes)
-
-        print("chipertext : ", chipertext)
-        print("plaintext : ", message)
-
-        print('Sent')
-        print()
-
-    client_socket.close()
+    n1_send = pickle.dumps(encrypted_n1)
+    client_socket.send(n1_send)
