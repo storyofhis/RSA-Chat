@@ -1,4 +1,3 @@
-import hashlib
 import pickle
 import socket
 from util.RSA import RSA
@@ -13,27 +12,18 @@ print("Private Key [CLIENT] : ", private_key_client)
 public_key_client_serialized = pickle.dumps(public_key_client)
 client_socket.send(public_key_client_serialized)
 
-N2 = hashlib.sha256("Y442743h38r4rx733e2939e342Y".encode()).hexdigest()
-print("N1 : ", N2)
-
 while True:
     # get ip_addr from server
     encrypted_ip_addr = client_socket.recv(4096)
-    if not encrypted_ip_addr:
-        break
-    
     encrypted_ip_addr = pickle.loads(encrypted_ip_addr)
-    print(f"Encrypt [IP ADDR]: {encrypted_ip_addr}")
+    # print(f"Encrypt [IP ADDR]: {encrypted_ip_addr}")
     decrypted_ip_addr = RSA.decrypt(encrypted_ip_addr, private_key_client)
     print(f"Decrypt [IP ADDR]: {decrypted_ip_addr}")
-    ip_addr = decrypted_ip_addr  # ip_addr is the IP address
+    ip_addr = decrypted_ip_addr # ip_addr is ip address 
 
     # get N1 from server
     encrypted_n1 = client_socket.recv(4096)
-    if not encrypted_n1:
-        break
-    
     encrypted_n1 = pickle.loads(encrypted_n1)
-    print(f"ENCRYPTED [N1]: {encrypted_n1}")
+    # print(f"ENCRYPTED [N1]: {encrypted_n1}")
     decrypted_n1 = RSA.decrypt(encrypted_n1, private_key_client)
     print(f"Decrypt [N1]: {decrypted_n1}")
