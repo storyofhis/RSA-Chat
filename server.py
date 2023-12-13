@@ -1,3 +1,4 @@
+# INITIATOR A
 import hashlib
 import socket
 import pickle
@@ -5,7 +6,8 @@ from DES.DES import DES
 from RSA.RSA import RSA
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-IP = socket.gethostname()
+# IP = socket.gethostname()
+IP = '127.0.0.1'
 PORT = 8080
 server_socket.bind((IP, PORT))  # Ganti 'localhost' dengan alamat IP server jika perlu
 server_socket.listen(5)
@@ -66,7 +68,12 @@ while True:
         client_socket.send(n2_send)
 
         # [4 th STEP] : DES communication
-        des_key = 17336
+        # receive des_key
+        des_key_enrypted = client_socket.recv(4096)
+        des_key_enrypted = pickle.loads(des_key_enrypted)
+        des_key_decrypted = RSA.decrypt(des_key_enrypted, private_key_server)
+
+        des_key = int(des_key_decrypted)
         des = DES(key = int(des_key))
 
         while True:

@@ -1,11 +1,13 @@
+# RESPONDER B
 import hashlib
 import pickle
 import socket
 from DES.DES import DES
-from util.RSA import RSA
+from RSA.RSA import RSA
+
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((socket.gethostname(), 8080))
+client_socket.connect(('127.0.0.1', 8080))
 
 # [1st STEP]: Share Public Key to Server
 public_key_client, private_key_client = RSA.generate_keys()  # Client generates its own keys
@@ -68,6 +70,9 @@ while True:
         # [4th STEP] : DES communication
         des_key = 17336
         des = DES(key = int(des_key))
+        des_key_enrypted = RSA.encrypt(str(des_key), public_key_server)
+        des_key_send = pickle.dumps(des_key_enrypted)
+        client_socket.send(des_key_send)
         
         while True:
             message = input('>> ').encode()
